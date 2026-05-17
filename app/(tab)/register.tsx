@@ -11,21 +11,22 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { API_BASE_URL, login, setAuthSession } from "@/lib/api";
+import { register, setAuthSession } from "@/lib/api";
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unable to log in.";
+  return error instanceof Error ? error.message : "Unable to register.";
 }
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  async function handleLogin() {
-    if (!email.trim() || !password) {
-      setMessage("Please enter your email and password.");
+  async function handleRegister() {
+    if (!name.trim() || !email.trim() || !password) {
+      setMessage("Please fill in every field.");
       return;
     }
 
@@ -33,11 +34,13 @@ export default function LoginScreen() {
     setMessage("");
 
     try {
-      const result = await login(email.trim(), password);
+      const result = await register(name.trim(), email.trim(), password);
       const token = result.token ?? result.access_token;
 
       if (!token) {
-        setMessage(result.message ?? "Login successful, but no token returned.");
+        setMessage(
+          result.message ?? "Account created successfully, but no token returned.",
+        );
         return;
       }
 
@@ -63,17 +66,29 @@ export default function LoginScreen() {
             </View>
 
             <Text className="text-4xl font-black text-white">
-              Welcome back
+              Create account
             </Text>
             <Text className="mt-3 text-base leading-6 text-slate-300">
-              Sign in with your Laravel account.
-            </Text>
-            <Text className="mt-2 text-xs text-slate-500">
-              API: {API_BASE_URL}
+              Register a new user in your Laravel backend.
             </Text>
           </View>
 
           <View className="gap-5">
+            <View>
+              <Text className="mb-2 text-sm font-semibold text-slate-200">
+                Full name
+              </Text>
+              <TextInput
+                autoCapitalize="words"
+                autoComplete="name"
+                onChangeText={setName}
+                placeholder="Your name"
+                placeholderTextColor="#64748b"
+                value={name}
+                className="h-14 rounded-xl border border-slate-700 bg-slate-900 px-4 text-base text-white"
+              />
+            </View>
+
             <View>
               <Text className="mb-2 text-sm font-semibold text-slate-200">
                 Email address
@@ -96,9 +111,9 @@ export default function LoginScreen() {
               </Text>
               <TextInput
                 autoCapitalize="none"
-                autoComplete="password"
+                autoComplete="new-password"
                 onChangeText={setPassword}
-                placeholder="Enter your password"
+                placeholder="Create a password"
                 placeholderTextColor="#64748b"
                 secureTextEntry
                 value={password}
@@ -114,7 +129,7 @@ export default function LoginScreen() {
 
             <Pressable
               disabled={isLoading}
-              onPress={handleLogin}
+              onPress={handleRegister}
               className={`mt-2 h-14 items-center justify-center rounded-xl bg-emerald-400 ${
                 isLoading ? "opacity-70" : "opacity-100"
               }`}
@@ -123,7 +138,7 @@ export default function LoginScreen() {
                 <ActivityIndicator color="#020617" />
               ) : (
                 <Text className="text-base font-bold text-slate-950">
-                  Log in
+                  Create account
                 </Text>
               )}
             </Pressable>
@@ -131,12 +146,12 @@ export default function LoginScreen() {
 
           <View className="flex-row justify-center">
             <Text className="text-sm text-slate-400">
-              {"Don't have an account? "}
+              {"Already have an account? "}
             </Text>
-            <Link href="/register" asChild>
+            <Link href="/" asChild>
               <Pressable>
                 <Text className="text-sm font-bold text-emerald-300">
-                  Sign up
+                  Log in
                 </Text>
               </Pressable>
             </Link>
